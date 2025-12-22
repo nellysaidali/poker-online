@@ -1,4 +1,7 @@
-const SERVER_URL = (window.SERVER_URL || "http://localhost:3000");
+// client/app.js
+const SERVER_URL =
+  window.SERVER_URL || "https://poker-online.onrender.com";
+
 const socket = io(SERVER_URL, { transports: ["websocket", "polling"] });
 
 const $ = (id) => document.getElementById(id);
@@ -63,7 +66,6 @@ function isMyTurn() {
   return inHandPhases.includes(phase) && lastPublic?.game?.currentSeat === seat;
 }
 
-// ---- Raise helpers + overlay ----
 function mySeat() {
   const seat = mySeatIndex();
   if (seat === null) return null;
@@ -123,7 +125,6 @@ function showOverlay(show, text = "-") {
 
 function render() {
   if (!lastPublic) return;
-
   const g = lastPublic.game;
 
   if ($("phase")) $("phase").textContent = g.phase;
@@ -139,7 +140,6 @@ function render() {
       : "-";
   }
 
-  // seats
   const seatsEl = $("seats");
   if (seatsEl) {
     seatsEl.innerHTML = "";
@@ -152,9 +152,7 @@ function render() {
       if (s.seat === g.dealerSeat && g.phase !== "idle") div.classList.add("isDealer");
       if (!s.inHand) div.classList.add("isOut");
 
-      const flags = [
-        s.allIn ? "ALL-IN" : null
-      ].filter(Boolean).join(" ");
+      const flags = [s.allIn ? "ALL-IN" : null].filter(Boolean).join(" ");
 
       div.innerHTML = `
         <div class="top">
@@ -169,7 +167,6 @@ function render() {
     }
   }
 
-  // ta main
   const handEl = $("yourHand");
   if (handEl) {
     handEl.innerHTML = "";
@@ -182,9 +179,7 @@ function render() {
     }
   }
 
-  // actions enabled/disabled
   const myTurn = isMyTurn();
-
   const ids = ["btnFold","btnCheck","btnCall","btnRaise","btnMinRaise","btnPlusBB","btnPlus2BB","btnPot","btnAllIn"];
   for (const id of ids) {
     const b = $(id);
@@ -194,7 +189,6 @@ function render() {
   const hint = $("turnHint");
   if (hint) hint.textContent = myTurn ? "C'est ton tour." : "Attends ton tour (ou démarre une main).";
 
-  // Overlay fin de main
   const ended = (g.phase === "idle") && !!g.lastWinners;
   if (ended) {
     const txt = `${g.lastWinners.winners.join(" & ")} (${g.lastWinners.hand})`;
@@ -203,51 +197,12 @@ function render() {
     showOverlay(false);
   }
 
-  // pré-remplir raiseTo quand c'est ton tour
   const raiseInput = $("raiseTo");
-  if (myTurn && raiseInput) {
-    if (!raiseInput.value) raiseInput.value = String(clampRaiseTo(minRaiseTo()));
+  if (myTurn && raiseInput && !raiseInput.value) {
+    raiseInput.value = String(clampRaiseTo(minRaiseTo()));
   }
-
-  // debug
-  const statePre = $("state");
-  if (statePre) statePre.textContent = JSON.stringify(lastPublic, null, 2);
-  const privPre = $("privateState");
-  if (privPre) privPre.textContent = JSON.stringify(lastPrivate, null, 2);
 }
 
-// ---- create/join/start ----
-$("create").onclick = () => {
-  const name = ($("name")?.value || "").trim() || "Joueur 1";
-  socket.emit("room:create", { name }, (res) => {
-    if (!res?.ok) return setMsg("Erreur création room");
-    $("roomCode").value = res.roomCode;
-    setMsg(`Room créée: ${res.roomCode}`);
-  });
-};
-
-$("join").onclick = () => {
-  const name = ($("name")?.value || "").trim() || "Joueur 2";
-  const roomCode = myRoomCode();
-  if (!roomCode) return setMsg("Mets un code room.");
-  socket.emit("room:join", { roomCode, name }, (res) => {
-    if (!res?.ok) return setMsg(res?.error || "Erreur join");
-    setMsg(`Rejoint la room ${roomCode}`);
-  });
-};
-
-$("startHand").onclick = () => {
-  const roomCode = myRoomCode();
-  if (!roomCode) return setMsg("Mets le code room avant de démarrer une main.");
-  socket.emit("game:startHand", { roomCode }, (res) => {
-    if (!res?.ok) return setMsg(res?.error || "Erreur startHand");
-    setMsg("Main démarrée.");
-    const raiseInput = $("raiseTo");
-    if (raiseInput) raiseInput.value = "";
-  });
-};
-
-// ---- actions ----
 function sendAction(action) {
   const roomCode = myRoomCode();
   if (!roomCode) return setMsg("Mets un code room.");
@@ -257,50 +212,85 @@ function sendAction(action) {
   });
 }
 
-$("btnFold").onclick = () => sendAction({ type: "fold" });
-$("btnCheck").onclick = () => sendAction({ type: "check" });
-$("btnCall").onclick = () => sendAction({ type: "call" });
-$("btnRaise").onclick = () => {
-  const v = Number($("raiseTo").value);
+// handlers (safe)
+$("create")?.addEventListener("click", () => {
+  const name = ($("name")?.value || "").trim() || "Joueur 1";
+  socket.emit("room:create", { name }, (res) => {
+    if (!res?.ok) return setMsg("Erreur création room");
+    if ($("roomCode")) $("roomCode").value = res.roomCode;
+    setMsg(`Room créée: ${res.roomCode}`);
+  });
+});
+
+$("join")?.addEventListener("click", () => {
+  const name = ($("name")?.value || "").trim() || "Joueur 2";
+  const roomCode = myRoomCode();
+  if (!roomCode) return setMsg("Mets un code room.");
+  socket.emit("room:join", { roomCode, name }, (res) => {
+    if (!res?.ok) return setMsg(res?.error || "Erreur join");
+    setMsg(`Rejoint la room ${roomCode}`);
+  });
+});
+
+$("startHand")?.addEventListener("click", () => {
+  const roomCode = myRoomCode();
+  if (!roomCode) return setMsg("Mets le code room avant de démarrer une main.");
+  socket.emit("game:startHand", { roomCode }, (res) => {
+    if (!res?.ok) return setMsg(res?.error || "Erreur startHand");
+    setMsg("Main démarrée.");
+    const raiseInput = $("raiseTo");
+    if (raiseInput) raiseInput.value = "";
+  });
+});
+
+$("btnFold")?.addEventListener("click", () => sendAction({ type: "fold" }));
+$("btnCheck")?.addEventListener("click", () => sendAction({ type: "check" }));
+$("btnCall")?.addEventListener("click", () => sendAction({ type: "call" }));
+$("btnRaise")?.addEventListener("click", () => {
+  const v = Number($("raiseTo")?.value);
   if (!Number.isFinite(v) || v <= 0) return setMsg("Mets un montant Raise To valide (ex: 60)");
   sendAction({ type: "raise", amount: clampRaiseTo(v) });
-};
+});
 
-// ---- quick raise buttons ----
-$("btnMinRaise").onclick = () => {
-  $("raiseTo").value = String(clampRaiseTo(minRaiseTo()));
-};
+$("btnMinRaise")?.addEventListener("click", () => {
+  const input = $("raiseTo");
+  if (input) input.value = String(clampRaiseTo(minRaiseTo()));
+});
 
-$("btnPlusBB").onclick = () => {
+$("btnPlusBB")?.addEventListener("click", () => {
   const g = lastPublic?.game;
-  const base = Number($("raiseTo").value) || clampRaiseTo(minRaiseTo());
-  $("raiseTo").value = String(clampRaiseTo(base + (g?.bb || 0)));
-};
+  const input = $("raiseTo");
+  if (!input) return;
+  const base = Number(input.value) || clampRaiseTo(minRaiseTo());
+  input.value = String(clampRaiseTo(base + (g?.bb || 0)));
+});
 
-$("btnPlus2BB").onclick = () => {
+$("btnPlus2BB")?.addEventListener("click", () => {
   const g = lastPublic?.game;
-  const base = Number($("raiseTo").value) || clampRaiseTo(minRaiseTo());
-  $("raiseTo").value = String(clampRaiseTo(base + 2 * (g?.bb || 0)));
-};
+  const input = $("raiseTo");
+  if (!input) return;
+  const base = Number(input.value) || clampRaiseTo(minRaiseTo());
+  input.value = String(clampRaiseTo(base + 2 * (g?.bb || 0)));
+});
 
-$("btnPot").onclick = () => {
+$("btnPot")?.addEventListener("click", () => {
   const g = lastPublic?.game;
-  if (!g) return;
-  $("raiseTo").value = String(clampRaiseTo((g.toCall || 0) + (g.pot || 0)));
-};
+  const input = $("raiseTo");
+  if (!g || !input) return;
+  input.value = String(clampRaiseTo((g.toCall || 0) + (g.pot || 0)));
+});
 
-$("btnAllIn").onclick = () => {
+$("btnAllIn")?.addEventListener("click", () => {
   const g = lastPublic?.game;
   const me = mySeat();
-  if (!g || !me) return;
+  const input = $("raiseTo");
+  if (!g || !me || !input) return;
   const target = (g.toCall || 0) + ((me.stack || 0) + (me.bet || 0));
-  $("raiseTo").value = String(clampRaiseTo(target));
-};
+  input.value = String(clampRaiseTo(target));
+});
 
-// ---- overlay buttons ----
-$("btnCloseOverlay").onclick = () => showOverlay(false);
-
-$("btnNextHand").onclick = () => {
+$("btnCloseOverlay")?.addEventListener("click", () => showOverlay(false));
+$("btnNextHand")?.addEventListener("click", () => {
   const roomCode = myRoomCode();
   socket.emit("game:startHand", { roomCode }, (res) => {
     if (!res?.ok) return setMsg(res?.error || "Erreur startHand");
@@ -309,7 +299,6 @@ $("btnNextHand").onclick = () => {
     const raiseInput = $("raiseTo");
     if (raiseInput) raiseInput.value = "";
   });
-};
+});
 
-// init
 setServerOnline(socket.connected);
