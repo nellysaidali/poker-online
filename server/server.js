@@ -7,33 +7,26 @@ const app = express();          // ← CE QUI MANQUE CHEZ TOI
 const server = http.createServer(app);
 
 const ALLOWED_ORIGINS = [
+  "https://poker-online-1.onrender.com", // ton front actuel
+  "https://poker-online.onrender.com",   // si tu sers aussi le front là
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:8080",
   "http://127.0.0.1:8080",
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "https://poker-online-1.onrender.com",
-  "https://poker-online-client.onrender.com",
-  "https://poker-online-1.onrender.com",
-  
-  // on ajoutera ton lien GitHub Pages après
 ];
 
-
-app.use(cors({
+const corsOptions = {
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // ex: curl / postman
-    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    if (!origin) return cb(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, origin); // <= IMPORTANT
     return cb(new Error("CORS blocked: " + origin));
   },
-  credentials: true
-}));
+  credentials: true,
+};
 
-const io = new Server(server, {
-  path: "/socket.io",
-  cors: { origin: "*", credentials: false }
-});
+app.use(cors(corsOptions));
+
+const io = new Server(server, { cors: corsOptions });
 
 
 // ---------- Utils ----------
