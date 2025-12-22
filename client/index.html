@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Poker Online (V1)</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1>Poker (Texas Hold’em) — V1</h1>
+
+      <div class="serverStatus">
+        <span>État du serveur</span>
+        <span id="serverDot" class="dot dot-red" title="Déconnecté"></span>
+        <span id="serverText" class="badge">Hors ligne</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <input id="name" placeholder="Ton pseudo" />
+      </div>
+
+      <div class="row">
+        <button id="create">Créer une room</button>
+      </div>
+
+      <div class="row">
+        <input id="roomCode" placeholder="Code room (ex: AB12)" maxlength="4" />
+        <button id="join">Rejoindre</button>
+      </div>
+
+      <p id="msg"></p>
+    </div>
+
+    <div class="card">
+      <h2>Table</h2>
+
+      <div class="row">
+        <button id="startHand">Démarrer la main</button>
+      </div>
+
+      <div class="table">
+        <div class="info">
+          <div><b>Phase:</b> <span id="phase">-</span></div>
+          <div><b>Pot:</b> <span id="pot">0€</span></div>
+          <div><b>ToCall:</b> <span id="toCall">0€</span></div>
+          <div><b>Dealer:</b> <span id="dealerSeat">-</span></div>
+          <div><b>Tour:</b> <span id="currentSeat">-</span></div>
+          <div><b>Board:</b> <span id="board">-</span></div>
+          <div><b>Résultat:</b> <span id="result">-</span></div>
+        </div>
+
+        <div id="seats" class="seats"></div>
+
+        <h3>Toi (privé)</h3>
+        <div id="yourHand" class="hand"></div>
+      </div>
+
+      <h3>Actions</h3>
+
+      <div class="row">
+        <button id="btnFold">Fold</button>
+        <button id="btnCheck">Check</button>
+        <button id="btnCall">Call</button>
+      </div>
+
+      <div class="row">
+        <button id="btnMinRaise">Min-raise</button>
+        <button id="btnPlusBB">+BB</button>
+        <button id="btnPlus2BB">+2BB</button>
+        <button id="btnPot">Pot</button>
+        <button id="btnAllIn">All-in</button>
+      </div>
+
+      <div class="row">
+        <input id="raiseTo" type="number" min="0" step="10" placeholder="Raise To (ex: 60)" />
+        <button id="btnRaise">Raise</button>
+      </div>
+
+      <p id="turnHint"></p>
+
+      <!-- Overlay fin de main -->
+      <div id="handOverlay" class="overlay hidden">
+        <div class="overlayCard">
+          <h2>Fin de main</h2>
+          <p id="overlayResult">-</p>
+
+          <div id="potsBreakdown" class="pots"></div>
+
+          <div class="row">
+            <button id="btnNextHand">Main suivante</button>
+            <button id="btnCloseOverlay">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <details class="card">
+      <summary>Debug (état serveur)</summary>
+      <pre id="state">Pas de state</pre>
+    </details>
+
+    <details class="card">
+      <summary>Debug (privé)</summary>
+      <pre id="privateState">Pas de state privé</pre>
+    </details>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+  // en local tu touches pas. En prod, tu mettras l’URL Render ici.
+  window.SERVER_URL = "http://localhost:3000";
+</script>
+
+  <script src="./app.js"></script>
+</body>
+</html>
