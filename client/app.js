@@ -1,10 +1,6 @@
-const SERVER_URL =
-  window.SERVER_URL ||
-  (location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : "https://poker-online.onrender.com");
-
+const SERVER_URL = "https://poker-online.onrender.com";
 const socket = io(SERVER_URL, { transports: ["websocket", "polling"] });
+
 
 
 
