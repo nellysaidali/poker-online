@@ -7,26 +7,30 @@ const app = express();          // ← CE QUI MANQUE CHEZ TOI
 const server = http.createServer(app);
 
 const ALLOWED_ORIGINS = [
-  "https://poker-online-1.onrender.com", // ton front actuel
-  "https://poker-online.onrender.com",   // si tu sers aussi le front là
+  "https://poker-online-1.onrender.com",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:8080",
   "http://127.0.0.1:8080",
 ];
 
+
+
 const corsOptions = {
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, origin); // <= IMPORTANT
+    if (!origin) return cb(null, origin);
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      return cb(null, origin); // IMPORTANT : renvoyer l'origin
+    }
     return cb(new Error("CORS blocked: " + origin));
   },
   credentials: true,
 };
 
 app.use(cors(corsOptions));
-
-const io = new Server(server, { cors: corsOptions });
+const io = new Server(server, {
+  cors: corsOptions,
+});
 
 
 // ---------- Utils ----------
