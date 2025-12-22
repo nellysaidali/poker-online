@@ -13,9 +13,13 @@ const ALLOWED_ORIGINS = [
   "http://127.0.0.1:8080",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
+  "https://poker-online-1.onrender.com",
   "https://poker-online-client.onrender.com",
+  "https://poker-online-1.onrender.com",
+  
   // on ajoutera ton lien GitHub Pages après
 ];
+
 
 app.use(cors({
   origin: (origin, cb) => {
@@ -27,15 +31,10 @@ app.use(cors({
 }));
 
 const io = new Server(server, {
-  cors: {
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-      return cb(new Error("CORS blocked: " + origin));
-    },
-    credentials: true
-  }
+  path: "/socket.io",
+  cors: { origin: "*", credentials: false }
 });
+
 
 // ---------- Utils ----------
 function makeRoomCode() {

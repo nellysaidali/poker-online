@@ -1,10 +1,10 @@
 const SERVER_URL = "https://poker-online.onrender.com";
-const socket = io(SERVER_URL, { transports: ["websocket", "polling"] });
 
+const socket = io(SERVER_URL, {
+  path: "/socket.io",
+  transports: ["polling", "websocket"], // IMPORTANT: polling d’abord
+});
 
-
-
-const $ = (id) => document.getElementById(id);
 
 let lastPublic = null;
 let lastPrivate = null;
