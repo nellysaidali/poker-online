@@ -1,8 +1,12 @@
-// client/app.js
 const SERVER_URL =
-  window.SERVER_URL || "https://poker-online.onrender.com";
+  window.SERVER_URL ||
+  (location.hostname === "localhost"
+    ? "http://localhost:3000"
+    : "https://poker-online.onrender.com");
 
 const socket = io(SERVER_URL, { transports: ["websocket", "polling"] });
+
+
 
 const $ = (id) => document.getElementById(id);
 
@@ -13,6 +17,7 @@ function money(n) {
   const v = Number(n) || 0;
   return `${Math.floor(v)}€`;
 }
+
 
 function setMsg(t) {
   const el = $("msg");
