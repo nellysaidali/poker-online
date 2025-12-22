@@ -1,3 +1,11 @@
+const express = require("express");
+const cors = require("cors");
+const http = require("http");
+const { Server } = require("socket.io");
+
+const app = express();          // ← CE QUI MANQUE CHEZ TOI
+const server = http.createServer(app);
+
 const ALLOWED_ORIGINS = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
