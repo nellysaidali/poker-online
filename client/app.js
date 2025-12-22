@@ -1,3 +1,5 @@
+const $ = (id) => document.getElementById(id);
+
 const SERVER_URL = "https://poker-online.onrender.com";
 
 const socket = io(SERVER_URL, {
