@@ -1,3 +1,9 @@
+console.log("CONNECT", socket.id, "origin:", socket.handshake.headers.origin);
+
+socket.onAny((event, ...args) => {
+  console.log("EVENT", event, "argsCount:", args.length, "from", socket.id);
+});
+
 console.log("🔥 SERVER.JS ROOM VERSION ACTIVE 🔥");
 
 const express = require("express");
