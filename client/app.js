@@ -1,12 +1,12 @@
 const $ = (id) => document.getElementById(id);
 
+// IMPORTANT : l’URL du BACKEND (ton Web Service Render)
 const SERVER_URL = "https://poker-online.onrender.com";
 
-const socket = io(SERVER_URL, {
-  path: "/socket.io",
-  transports: ["polling", "websocket"], // IMPORTANT: polling d’abord
-});
 
+const socket = io(SERVER_URL, {
+  transports: ["polling", "websocket"],
+});
 
 let lastPublic = null;
 let lastPrivate = null;
